@@ -72,7 +72,8 @@ void Renderer::render() {
     QOpenGLFramebufferObject fbo(image.size());
     fbo.bind();
 
-    glDrawArrays(GL_TRIANGLES, 0, buffer->size());
+    for (int i = 0; i < buffer->size(); i += 12)
+        glDrawArrays(GL_TRIANGLES, i, 12);
 
     emit updatePixmap(fbo.toImage());
 
@@ -107,11 +108,14 @@ void Renderer::initialize() {
 }
 
 void Renderer::createVertexBuffer() {
-    static const GLfloat vertices[] = {
-        -1.0f, 1.0f,
-        3.0f, 1.0f,
-        -1.0f, -3.0f,
-    };
+    const GLfloat step = 2;
+
+    QVector<GLfloat> vertices;
+
+    for (GLfloat x = -1; x < 1; x += step)
+        for (GLfloat y = -1; y < 1; y += step)
+            vertices << x << y << x << y + step << x + step << y + step
+                     << x << y << x + step << y << x + step << y + step;
 
     buffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
     buffer->create();
@@ -119,7 +123,7 @@ void Renderer::createVertexBuffer() {
     buffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
 
     buffer->bind();
-    buffer->allocate(vertices, sizeof(vertices) * sizeof(GLfloat));
+    buffer->allocate(vertices.data(), vertices.size() * sizeof(GLfloat));
     buffer->release();
 }
 

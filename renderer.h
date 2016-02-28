@@ -2,8 +2,9 @@
 
 #include <QtWidgets>
 #include <QtOpenGL>
+#include <QOpenGLFunctions_3_3_Core>
 
-class Renderer : public QWindow, protected QOpenGLFunctions {
+class Renderer : public QWindow, protected QOpenGLFunctions_3_3_Core {
     Q_OBJECT
 
     QOpenGLContext *context;
