@@ -1,21 +1,12 @@
 #include <QApplication>
 
-//#include "glwidget.h"
-
-#include "offscreen.h"
-#include <QLabel>
+#include "widget.h"
 
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
 
-//    GLWidget w;
-//    w.show();
-
-    OffScreen off;
-
-    QLabel label;
-    label.setPixmap(QPixmap::fromImage(off.render()));
-    label.show();
+    Widget w;
+    w.show();
 
     return a.exec();
 }

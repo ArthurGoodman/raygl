@@ -2,6 +2,8 @@
 
 out vec4 color;
 
+uniform vec2 resolution;
+
 void main() {
-    color = vec4(gl_FragCoord.x / 1920 * 2, gl_FragCoord.y / 1080 * 2, 0, 1);
+    color = vec4(gl_FragCoord.xy / resolution, 0, 1);
 }

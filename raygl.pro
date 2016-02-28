@@ -6,12 +6,16 @@ TARGET = raygl
 TEMPLATE = app
 
 SOURCES += main.cpp \
-    glwidget.cpp \
-    offscreen.cpp
+    widget.cpp \
+    renderer.cpp \
+    console.cpp \
+    consoleparser.cpp
 
 HEADERS  += \
-    glwidget.h \
-    offscreen.h
+    widget.h \
+    renderer.h \
+    console.h \
+    consoleparser.h
 
 RESOURCES += \
     resources.qrc
