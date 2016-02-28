@@ -1,7 +1,7 @@
 #include "renderer.h"
 
 Renderer::Renderer(QWindow *parent)
-    : QWindow(parent), context(0) {
+    : QWindow(parent), context(0), fbo(0) {
     setSurfaceType(QWindow::OpenGLSurface);
     setFormat(QSurfaceFormat());
     create();
@@ -11,77 +11,71 @@ Renderer::~Renderer() {
     delete context;
     delete program;
     delete buffer;
+    delete fbo;
 }
 
 void Renderer::start() {
     QTimer *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &Renderer::render);
     connect(this, SIGNAL(destroyed()), timer, SLOT(deleteLater()));
-    timer->start(0);
+    timer->start(16);
 }
 
 void Renderer::resizeViewport(const QSize &size) {
-    image = QImage(size, QImage::Format_RGB888);
-
-    context->makeCurrent(this);
-
-    glGenTextures(1, &texture);
-
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.width(), image.height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image.bits());
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    glViewport(0, 0, image.width(), image.height());
-
-    context->doneCurrent();
+    newSize = size;
 }
 
 void Renderer::render() {
     if (context == 0)
         initialize();
 
-    if (image.isNull())
+    if(newSize != size) {
+        size = newSize;
+
+        context->makeCurrent(this);
+
+        glViewport(0, 0, size.width(), size.height());
+
+        if (fbo)
+            delete fbo;
+
+        fbo = new QOpenGLFramebufferObject(size);
+
+        context->doneCurrent();
+    }
+
+    if (fbo == 0)
         return;
 
     context->makeCurrent(this);
 
-    static const char *vertexBufferName = "position";
-
     program->bind();
     buffer->bind();
+
+    static const char *vertexBufferName = "position";
+
     program->enableAttributeArray(vertexBufferName);
     program->setAttributeBuffer(vertexBufferName, GL_FLOAT, 0, 2);
 
-    static float time = 0;
-    time += 0.05;
-
-    program->setUniformValue("resolution", image.size());
-    program->setUniformValue("time", time);
+    fbo->bind();
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(GL_TEXTURE_2D, fbo->texture());
 
-    QOpenGLFramebufferObject fbo(image.size());
-    fbo.bind();
+    program->setUniformValue("buffer", 0);
+    program->setUniformValue("resolution", size);
 
     for (int i = 0; i < buffer->size(); i += 12)
         glDrawArrays(GL_TRIANGLES, i, 12);
 
-    emit updatePixmap(fbo.toImage());
+    emit updatePixmap(fbo->toImage());
 
     program->disableAttributeArray("vertexBufferName");
+
     program->release();
     buffer->release();
 
-    fbo.release();
+    fbo->release();
 
     glActiveTexture(0);
     glBindTexture(GL_TEXTURE_2D, 0);

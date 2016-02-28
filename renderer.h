@@ -10,9 +10,9 @@ class Renderer : public QWindow, protected QOpenGLFunctions_3_3_Core {
     QOpenGLContext *context;
     QOpenGLShaderProgram *program;
     QOpenGLBuffer *buffer;
-    GLuint texture;
+    QOpenGLFramebufferObject *fbo;
 
-    QImage image;
+    QSize size, newSize;
 
 public:
     explicit Renderer(QWindow *parent = 0);
