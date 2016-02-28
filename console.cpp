@@ -6,7 +6,7 @@ Console::Console(QWidget *parent)
     setFrameShape(QFrame::NoFrame);
     viewport()->setCursor(Qt::ArrowCursor);
 
-    setFont(QFont("Consolas", 12));
+    setFont(QFont("Lucida Console", 10));
 
     setWordWrapMode(QTextOption::WrapAnywhere);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);

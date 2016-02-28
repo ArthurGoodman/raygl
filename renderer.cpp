@@ -5,8 +5,6 @@ Renderer::Renderer(QWindow *parent)
     setSurfaceType(QWindow::OpenGLSurface);
     setFormat(QSurfaceFormat());
     create();
-
-    initialize();
 }
 
 Renderer::~Renderer() {
@@ -15,7 +13,14 @@ Renderer::~Renderer() {
     delete buffer;
 }
 
-void Renderer::resize(const QSize &size) {
+void Renderer::start() {
+    QTimer *timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, &Renderer::render);
+    connect(this, SIGNAL(destroyed()), timer, SLOT(deleteLater()));
+    timer->start(0);
+}
+
+void Renderer::resizeViewport(const QSize &size) {
     image = QImage(size, QImage::Format_RGB888);
 
     context->makeCurrent(this);
@@ -39,7 +44,13 @@ void Renderer::resize(const QSize &size) {
     context->doneCurrent();
 }
 
-const QImage &Renderer::render() {
+void Renderer::render() {
+    if (context == 0)
+        initialize();
+
+    if (image.isNull())
+        return;
+
     context->makeCurrent(this);
 
     static const char *vertexBufferName = "position";
@@ -49,7 +60,11 @@ const QImage &Renderer::render() {
     program->enableAttributeArray(vertexBufferName);
     program->setAttributeBuffer(vertexBufferName, GL_FLOAT, 0, 2);
 
+    static float time = 0;
+    time += 0.05;
+
     program->setUniformValue("resolution", image.size());
+    program->setUniformValue("time", time);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -59,7 +74,7 @@ const QImage &Renderer::render() {
 
     glDrawArrays(GL_TRIANGLES, 0, buffer->size());
 
-    image = fbo.toImage();
+    emit updatePixmap(fbo.toImage());
 
     program->disableAttributeArray("vertexBufferName");
     program->release();
@@ -71,8 +86,6 @@ const QImage &Renderer::render() {
     glBindTexture(GL_TEXTURE_2D, 0);
 
     context->doneCurrent();
-
-    return image;
 }
 
 void Renderer::initialize() {

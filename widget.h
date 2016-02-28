@@ -15,6 +15,8 @@ class Widget : public QWidget {
 
     bool consoleVisible;
 
+    QPixmap pixmap;
+
 public:
     explicit Widget(QWidget *parent = 0);
     ~Widget();
@@ -33,4 +35,8 @@ private:
 
 private slots:
     void resizeConsole();
+    void updatePixmap(const QImage &image);
+
+signals:
+    void resizeViewport(const QSize &size);
 };

@@ -4,6 +4,8 @@
 #include <QtOpenGL>
 
 class Renderer : public QWindow, protected QOpenGLFunctions {
+    Q_OBJECT
+
     QOpenGLContext *context;
     QOpenGLShaderProgram *program;
     QOpenGLBuffer *buffer;
@@ -15,8 +17,15 @@ public:
     explicit Renderer(QWindow *parent = 0);
     ~Renderer();
 
-    void resize(const QSize &size);
-    const QImage &render();
+public slots:
+    void start();
+    void resizeViewport(const QSize &size);
+
+private slots:
+    void render();
+
+signals:
+    void updatePixmap(const QImage &image);
 
 private:
     void initialize();

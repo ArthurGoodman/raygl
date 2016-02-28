@@ -7,6 +7,8 @@ Widget::Widget(QWidget *parent)
     move(qApp->desktop()->rect().center() - rect().center());
 
     renderer = new Renderer;
+    connect(this, &Widget::resizeViewport, renderer, &Renderer::resizeViewport);
+    connect(renderer, &Renderer::updatePixmap, this, &Widget::updatePixmap);
 
     static const double consoleOpacity = 0.8;
 
@@ -19,14 +21,21 @@ Widget::Widget(QWidget *parent)
 
     consoleVisible = false;
 
-    QTimer *timer = new QTimer;
+    QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), SLOT(update()));
     connect(this, SIGNAL(destroyed()), timer, SLOT(deleteLater()));
     timer->start(16);
+
+    QThread *thread = new QThread;
+    connect(thread, SIGNAL(finished()), SLOT(deleteLater()));
+    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+    connect(thread, SIGNAL(finished()), renderer, SLOT(deleteLater()));
+    connect(thread, SIGNAL(started()), renderer, SLOT(start()));
+    renderer->moveToThread(thread);
+    thread->start();
 }
 
 Widget::~Widget() {
-    delete renderer;
     delete console;
     delete consoleParser;
 }
@@ -34,7 +43,7 @@ Widget::~Widget() {
 void Widget::resizeEvent(QResizeEvent *) {
     resizeConsole();
 
-    renderer->resize(size());
+    emit resizeViewport(size());
 }
 
 void Widget::keyPressEvent(QKeyEvent *e) {
@@ -71,7 +80,7 @@ void Widget::wheelEvent(QWheelEvent *) {
 
 void Widget::paintEvent(QPaintEvent *) {
     QPainter p(this);
-    p.drawImage(0, 0, renderer->render());
+    p.drawPixmap(0, 0, pixmap);
 }
 
 void Widget::toggleConsole() {
@@ -98,4 +107,8 @@ void Widget::toggleConsole() {
 
 void Widget::resizeConsole() {
     console->resize(width(), consoleVisible ? height() / 3 : 0);
+}
+
+void Widget::updatePixmap(const QImage &image) {
+    pixmap = QPixmap::fromImage(image);
 }
