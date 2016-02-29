@@ -1,10 +1,13 @@
 #version 330
 
-out vec4 color;
+out vec4 fragColor;
 
-uniform vec2 resolution;
-uniform sampler2D buffer;
+uniform sampler2D uBuffer;
+uniform vec2 uResolution;
+uniform vec2 uRotation;
+uniform float uScale;
+uniform float uTime;
 
 void main() {
-    color = vec4(gl_FragCoord.xy / resolution, 0, 1);
+    fragColor = vec4(gl_FragCoord.xy / uResolution, 0, 1);
 }

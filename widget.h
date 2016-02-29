@@ -17,6 +17,11 @@ class Widget : public QWidget {
 
     QPixmap pixmap;
 
+    QPoint lastMousePosition;
+
+    QPoint rotation;
+    float scale;
+
 public:
     explicit Widget(QWidget *parent = 0);
     ~Widget();
@@ -31,6 +36,7 @@ protected:
     void paintEvent(QPaintEvent *e);
 
 private:
+    void defaults();
     void toggleConsole();
 
 private slots:

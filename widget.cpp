@@ -10,6 +10,8 @@ Widget::Widget(QWidget *parent)
     connect(this, &Widget::resizeViewport, renderer, &Renderer::resizeViewport);
     connect(renderer, &Renderer::updatePixmap, this, &Widget::updatePixmap);
 
+    defaults();
+
     static const double consoleOpacity = 0.8;
 
     console = new Console(this);
@@ -66,21 +68,37 @@ void Widget::keyPressEvent(QKeyEvent *e) {
     }
 }
 
-void Widget::mousePressEvent(QMouseEvent *) {
+void Widget::mousePressEvent(QMouseEvent *e) {
+    lastMousePosition = e->pos();
 }
 
-void Widget::mouseMoveEvent(QMouseEvent *) {
+void Widget::mouseMoveEvent(QMouseEvent *e) {
+    rotation += e->pos() - lastMousePosition;
+    renderer->setRotation(rotation);
+
+    lastMousePosition = e->pos();
 }
 
 void Widget::mouseReleaseEvent(QMouseEvent *) {
 }
 
-void Widget::wheelEvent(QWheelEvent *) {
+void Widget::wheelEvent(QWheelEvent *e) {
+    if (e->delta() > 1)
+        scale *= 1.05;
+    else
+        scale /= 1.05;
+
+    renderer->setScale(scale);
 }
 
 void Widget::paintEvent(QPaintEvent *) {
     QPainter p(this);
     p.drawPixmap(0, 0, pixmap);
+}
+
+void Widget::defaults() {
+    renderer->setRotation(rotation = QPoint());
+    renderer->setScale(scale = 1);
 }
 
 void Widget::toggleConsole() {

@@ -14,11 +14,21 @@ Renderer::~Renderer() {
     delete fbo;
 }
 
+void Renderer::setRotation(const QPoint &rotation) {
+    this->rotation = rotation;
+}
+
+void Renderer::setScale(float scale) {
+    this->scale = scale;
+}
+
 void Renderer::start() {
     QTimer *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &Renderer::render);
     connect(this, SIGNAL(destroyed()), timer, SLOT(deleteLater()));
     timer->start(16);
+
+    time.start();
 }
 
 void Renderer::resizeViewport(const QSize &size) {
@@ -29,7 +39,7 @@ void Renderer::render() {
     if (context == 0)
         initialize();
 
-    if(newSize != size) {
+    if (newSize != size) {
         size = newSize;
 
         context->makeCurrent(this);
@@ -62,8 +72,11 @@ void Renderer::render() {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, fbo->texture());
 
-    program->setUniformValue("buffer", 0);
-    program->setUniformValue("resolution", size);
+    program->setUniformValue("uBuffer", 0);
+    program->setUniformValue("uResolution", size);
+    program->setUniformValue("uRotation", rotation);
+    program->setUniformValue("uScale", scale);
+    program->setUniformValue("uTime", (GLfloat)time.elapsed() / 1000.f);
 
     for (int i = 0; i < buffer->size(); i += 12)
         glDrawArrays(GL_TRIANGLES, i, 12);

@@ -14,9 +14,17 @@ class Renderer : public QWindow, protected QOpenGLFunctions_3_3_Core {
 
     QSize size, newSize;
 
+    QTime time;
+
+    QPoint rotation;
+    float scale;
+
 public:
     explicit Renderer(QWindow *parent = 0);
     ~Renderer();
+
+    void setRotation(const QPoint &rotation);
+    void setScale(float scale);
 
 public slots:
     void start();
