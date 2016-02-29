@@ -77,6 +77,7 @@ void Renderer::render() {
     program->setUniformValue("uRotation", rotation);
     program->setUniformValue("uScale", scale);
     program->setUniformValue("uTime", (GLfloat)time.elapsed() / 1000.f);
+    program->setUniformValue("uSamples", 1);
 
     for (int i = 0; i < buffer->size(); i += 12)
         glDrawArrays(GL_TRIANGLES, i, 12);
