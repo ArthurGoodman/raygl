@@ -25,13 +25,12 @@ void main() {
 
     vec3 col = vec3(0.0);
 
-    if( uFrame>0 )
-    {
-        col = texture2D( uBuffer, uv ).xyz;
-        col /= float(uFrame);
-        col = pow( col, vec3(0.4545) );
-    }
+    col = texture2D( uBuffer, uv ).xyz;
 
+    if( uFrame>0 )
+        col /= float(uFrame);
+
+    col = pow( col, vec3(0.4545) );
 
     // color grading and vigneting
     col = pow( col, vec3(0.8,0.85,0.9) );
