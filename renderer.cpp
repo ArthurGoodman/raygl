@@ -6,7 +6,7 @@ Renderer::Renderer(QWindow *parent)
     setFormat(QSurfaceFormat());
     create();
 
-    frame = 0;
+    reset = false;
 }
 
 Renderer::~Renderer() {
@@ -20,10 +20,12 @@ Renderer::~Renderer() {
 
 void Renderer::setRotation(const QPoint &rotation) {
     this->rotation = rotation;
+    reset = true;
 }
 
 void Renderer::setScale(float scale) {
     this->scale = scale;
+    reset = true;
 }
 
 void Renderer::start() {
@@ -43,7 +45,10 @@ void Renderer::render() {
     if (context == 0)
         initialize();
 
-    if (newSize != size) {
+    if (newSize != size || reset) {
+        frame = 0;
+        reset = false;
+
         size = newSize;
 
         context->makeCurrent(this);
@@ -53,12 +58,15 @@ void Renderer::render() {
         if (backBuffer)
             delete backBuffer;
 
-        backBuffer = new QOpenGLFramebufferObject(size);
+        QOpenGLFramebufferObjectFormat fboFormat;
+        fboFormat.setInternalTextureFormat(GL_RGB32F);
+
+        backBuffer = new QOpenGLFramebufferObject(size, fboFormat);
 
         if (frameBuffer)
             delete frameBuffer;
 
-        frameBuffer = new QOpenGLFramebufferObject(size);
+        frameBuffer = new QOpenGLFramebufferObject(size, fboFormat);
 
         context->doneCurrent();
     }

@@ -21,7 +21,7 @@ uniform int uSamples;
 // Display : average down and do gamma adjustment
 
 void main() {
-        vec2 uv = gl_FragCoord.xy / uResolution.xy;
+    vec2 uv = gl_FragCoord.xy / uResolution.xy;
 
     vec3 col = vec3(0.0);
 

@@ -20,6 +20,8 @@ class Renderer : public QWindow, protected QOpenGLFunctions_3_3_Core {
     QPoint rotation;
     float scale;
 
+    bool reset;
+
 public:
     explicit Renderer(QWindow *parent = 0);
     ~Renderer();

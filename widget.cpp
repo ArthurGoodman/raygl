@@ -71,7 +71,7 @@ void Widget::keyPressEvent(QKeyEvent *e) {
 void Widget::keyReleaseEvent(QKeyEvent *e) {
     switch (e->key()) {
     case Qt::Key_Return:
-        pixmap.save(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh.mm.ss.zzz") + ".png");
+        pixmap.save("shots/" + QDateTime::currentDateTime().toString("yyyy-MM-dd_hh.mm.ss.zzz") + ".png");
         break;
     }
 }
