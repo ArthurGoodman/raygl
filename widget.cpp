@@ -71,7 +71,13 @@ void Widget::keyPressEvent(QKeyEvent *e) {
 void Widget::keyReleaseEvent(QKeyEvent *e) {
     switch (e->key()) {
     case Qt::Key_Return:
-        pixmap.save("shots/" + QDateTime::currentDateTime().toString("yyyy-MM-dd_hh.mm.ss.zzz") + ".png");
+        const static char *imagesDirName = "images";
+
+        QDir dir;
+        if (!dir.exists(imagesDirName))
+            dir.mkdir(imagesDirName);
+
+        pixmap.save(QString(imagesDirName) + "/" + QDateTime::currentDateTime().toString("yyyy-MM-dd_hh.mm.ss.zzz") + ".png");
         break;
     }
 }
