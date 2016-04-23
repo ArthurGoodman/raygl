@@ -8,13 +8,14 @@ class Renderer : public QWindow, protected QOpenGLFunctions_3_3_Core {
     Q_OBJECT
 
     QOpenGLContext *context;
-    QOpenGLShaderProgram *program;
-    QOpenGLBuffer *buffer;
-    QOpenGLFramebufferObject *fbo;
+    QOpenGLShaderProgram *mainProgram, *postProgram;
+    QOpenGLBuffer *vertexBuffer;
+    QOpenGLFramebufferObject *backBuffer, *frameBuffer;
 
     QSize size, newSize;
 
     QTime time;
+    int frame;
 
     QPoint rotation;
     float scale;
@@ -40,4 +41,5 @@ private:
     void initialize();
     void createVertexBuffer();
     void loadShaders();
+    void loadShader(QOpenGLShaderProgram *program, const QString &name);
 };

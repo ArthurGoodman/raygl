@@ -1,17 +1,21 @@
 #include "renderer.h"
 
 Renderer::Renderer(QWindow *parent)
-    : QWindow(parent), context(0), fbo(0) {
+    : QWindow(parent), context(0), frameBuffer(0) {
     setSurfaceType(QWindow::OpenGLSurface);
     setFormat(QSurfaceFormat());
     create();
+
+    frame = 0;
 }
 
 Renderer::~Renderer() {
     delete context;
-    delete program;
-    delete buffer;
-    delete fbo;
+    delete mainProgram;
+    delete postProgram;
+    delete vertexBuffer;
+    delete backBuffer;
+    delete frameBuffer;
 }
 
 void Renderer::setRotation(const QPoint &rotation) {
@@ -46,53 +50,100 @@ void Renderer::render() {
 
         glViewport(0, 0, size.width(), size.height());
 
-        if (fbo)
-            delete fbo;
+        if (backBuffer)
+            delete backBuffer;
 
-        fbo = new QOpenGLFramebufferObject(size);
+        backBuffer = new QOpenGLFramebufferObject(size);
+
+        if (frameBuffer)
+            delete frameBuffer;
+
+        frameBuffer = new QOpenGLFramebufferObject(size);
 
         context->doneCurrent();
     }
 
-    if (fbo == 0)
+    if (backBuffer == 0 || frameBuffer == 0)
         return;
 
     context->makeCurrent(this);
 
-    program->bind();
-    buffer->bind();
-
     static const char *vertexBufferName = "position";
 
-    program->enableAttributeArray(vertexBufferName);
-    program->setAttributeBuffer(vertexBufferName, GL_FLOAT, 0, 2);
+    mainProgram->bind();
+    vertexBuffer->bind();
 
-    fbo->bind();
+    mainProgram->enableAttributeArray(vertexBufferName);
+    mainProgram->setAttributeBuffer(vertexBufferName, GL_FLOAT, 0, 2);
+
+    backBuffer->bind();
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, fbo->texture());
+    glBindTexture(GL_TEXTURE_2D, backBuffer->texture());
 
-    program->setUniformValue("uBuffer", 0);
-    program->setUniformValue("uResolution", size);
-    program->setUniformValue("uRotation", rotation);
-    program->setUniformValue("uScale", scale);
-    program->setUniformValue("uTime", (GLfloat)time.elapsed() / 1000.f);
-    program->setUniformValue("uSamples", 1);
+    mainProgram->setUniformValue("uBuffer", 0);
+    mainProgram->setUniformValue("uResolution", size);
+    mainProgram->setUniformValue("uRotation", rotation);
+    mainProgram->setUniformValue("uScale", scale);
+    mainProgram->setUniformValue("uTime", (GLfloat)time.elapsed() / 1000.f);
+    mainProgram->setUniformValue("uFrame", frame);
+    mainProgram->setUniformValue("uSamples", 1);
 
-    for (int i = 0; i < buffer->size(); i += 12)
+    for (int i = 0; i < vertexBuffer->size(); i += 12)
         glDrawArrays(GL_TRIANGLES, i, 12);
 
-    emit updatePixmap(fbo->toImage());
+    mainProgram->disableAttributeArray(vertexBufferName);
 
-    program->disableAttributeArray("vertexBufferName");
+    mainProgram->release();
+    vertexBuffer->release();
 
-    program->release();
-    buffer->release();
-
-    fbo->release();
+    backBuffer->release();
 
     glActiveTexture(0);
     glBindTexture(GL_TEXTURE_2D, 0);
+
+    //...
+
+    postProgram->bind();
+    vertexBuffer->bind();
+
+    postProgram->enableAttributeArray(vertexBufferName);
+    postProgram->setAttributeBuffer(vertexBufferName, GL_FLOAT, 0, 2);
+
+    frameBuffer->bind();
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, backBuffer->texture());
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, frameBuffer->texture());
+
+    postProgram->setUniformValue("uBuffer", 1);
+    postProgram->setUniformValue("uResolution", size);
+    postProgram->setUniformValue("uRotation", rotation);
+    postProgram->setUniformValue("uScale", scale);
+    postProgram->setUniformValue("uTime", (GLfloat)time.elapsed() / 1000.f);
+    postProgram->setUniformValue("uFrame", frame);
+    postProgram->setUniformValue("uSamples", 1);
+
+    for (int i = 0; i < vertexBuffer->size(); i += 12)
+        glDrawArrays(GL_TRIANGLES, i, 12);
+
+    emit updatePixmap(frameBuffer->toImage());
+
+    postProgram->disableAttributeArray(vertexBufferName);
+
+    postProgram->release();
+    vertexBuffer->release();
+
+    frameBuffer->release();
+
+    glActiveTexture(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    //...
+
+    frame++;
 
     context->doneCurrent();
 }
@@ -125,23 +176,26 @@ void Renderer::createVertexBuffer() {
             vertices << x << y << x << y + step << x + step << y + step
                      << x << y << x + step << y << x + step << y + step;
 
-    buffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-    buffer->create();
+    vertexBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+    vertexBuffer->create();
 
-    buffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
+    vertexBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
 
-    buffer->bind();
-    buffer->allocate(vertices.data(), vertices.size() * sizeof(GLfloat));
-    buffer->release();
+    vertexBuffer->bind();
+    vertexBuffer->allocate(vertices.data(), vertices.size() * sizeof(GLfloat));
+    vertexBuffer->release();
 }
 
 void Renderer::loadShaders() {
-    program = new QOpenGLShaderProgram(this);
+    loadShader(mainProgram = new QOpenGLShaderProgram(this), "main");
+    loadShader(postProgram = new QOpenGLShaderProgram(this), "post");
+}
 
-    if (!program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader.vert"))
+void Renderer::loadShader(QOpenGLShaderProgram *program, const QString &name) {
+    if (!program->addShaderFromSourceFile(QOpenGLShader::Vertex, QString(":/%0.vert").arg(name)))
         qDebug() << program->log();
 
-    if (!program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader.frag"))
+    if (!program->addShaderFromSourceFile(QOpenGLShader::Fragment, QString(":/%0.frag").arg(name)))
         qDebug() << program->log();
 
     if (!program->link())
