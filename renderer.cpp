@@ -55,11 +55,11 @@ void Renderer::render() {
 
         glViewport(0, 0, size.width(), size.height());
 
-        if (backBuffer)
-            delete backBuffer;
-
         QOpenGLFramebufferObjectFormat fboFormat;
         fboFormat.setInternalTextureFormat(GL_RGB32F);
+
+        if (backBuffer)
+            delete backBuffer;
 
         backBuffer = new QOpenGLFramebufferObject(size, fboFormat);
 
