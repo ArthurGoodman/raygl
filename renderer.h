@@ -40,6 +40,7 @@ signals:
     void updatePixmap(const QImage &image);
 
 private:
+    void draw(QOpenGLShaderProgram *program, QOpenGLFramebufferObject *buffer, GLfloat elapsed);
     void initialize();
     void createVertexBuffer();
     void loadShaders();

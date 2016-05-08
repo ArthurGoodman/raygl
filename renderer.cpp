@@ -76,84 +76,55 @@ void Renderer::render() {
 
     context->makeCurrent(this);
 
+    GLfloat elapsed = (GLfloat)time.elapsed() / 1000.f;
+
+    draw(mainProgram, backBuffer, elapsed);
+    draw(postProgram, frameBuffer, elapsed);
+
+    emit updatePixmap(frameBuffer->toImage());
+
+    frame++;
+
+    context->doneCurrent();
+}
+
+void Renderer::draw(QOpenGLShaderProgram *program, QOpenGLFramebufferObject *buffer, GLfloat elapsed) {
     static const char *vertexBufferName = "position";
 
-    mainProgram->bind();
+    program->bind();
     vertexBuffer->bind();
 
-    mainProgram->enableAttributeArray(vertexBufferName);
-    mainProgram->setAttributeBuffer(vertexBufferName, GL_FLOAT, 0, 2);
+    program->enableAttributeArray(vertexBufferName);
+    program->setAttributeBuffer(vertexBufferName, GL_FLOAT, 0, 2);
 
-    backBuffer->bind();
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, backBuffer->texture());
-
-    mainProgram->setUniformValue("uBuffer", 0);
-    mainProgram->setUniformValue("uResolution", size);
-    mainProgram->setUniformValue("uRotation", rotation);
-    mainProgram->setUniformValue("uScale", scale);
-    mainProgram->setUniformValue("uTime", (GLfloat)time.elapsed() / 1000.f);
-    mainProgram->setUniformValue("uFrame", frame);
-    mainProgram->setUniformValue("uSamples", 1);
-
-    for (int i = 0; i < vertexBuffer->size(); i += 12)
-        glDrawArrays(GL_TRIANGLES, i, 12);
-
-    mainProgram->disableAttributeArray(vertexBufferName);
-
-    mainProgram->release();
-    vertexBuffer->release();
-
-    backBuffer->release();
-
-    glActiveTexture(0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    //...
-
-    postProgram->bind();
-    vertexBuffer->bind();
-
-    postProgram->enableAttributeArray(vertexBufferName);
-    postProgram->setAttributeBuffer(vertexBufferName, GL_FLOAT, 0, 2);
-
-    frameBuffer->bind();
+    buffer->bind();
 
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, backBuffer->texture());
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, frameBuffer->texture());
+    glBindTexture(GL_TEXTURE_2D, buffer->texture());
 
-    postProgram->setUniformValue("uBuffer", 1);
-    postProgram->setUniformValue("uResolution", size);
-    postProgram->setUniformValue("uRotation", rotation);
-    postProgram->setUniformValue("uScale", scale);
-    postProgram->setUniformValue("uTime", (GLfloat)time.elapsed() / 1000.f);
-    postProgram->setUniformValue("uFrame", frame);
-    postProgram->setUniformValue("uSamples", 1);
+    program->setUniformValue("uBuffer", 1);
+    program->setUniformValue("uResolution", size);
+    program->setUniformValue("uRotation", rotation);
+    program->setUniformValue("uScale", scale);
+    program->setUniformValue("uTime", elapsed);
+    program->setUniformValue("uFrame", frame);
+    program->setUniformValue("uSamples", 1);
 
     for (int i = 0; i < vertexBuffer->size(); i += 12)
         glDrawArrays(GL_TRIANGLES, i, 12);
 
-    emit updatePixmap(frameBuffer->toImage());
+    program->disableAttributeArray(vertexBufferName);
 
-    postProgram->disableAttributeArray(vertexBufferName);
-
-    postProgram->release();
+    program->release();
     vertexBuffer->release();
 
-    frameBuffer->release();
+    buffer->release();
 
     glActiveTexture(0);
     glBindTexture(GL_TEXTURE_2D, 0);
-
-    //...
-
-    frame++;
-
-    context->doneCurrent();
 }
 
 void Renderer::initialize() {
