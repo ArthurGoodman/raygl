@@ -12,7 +12,7 @@ Widget::Widget(QWidget *parent)
     connect(this, &Widget::resizeViewport, renderer, &Renderer::resizeViewport);
     connect(renderer, &Renderer::updatePixmap, this, &Widget::updatePixmap);
 
-    renderer->setShader(new ShaderProgram("main", "post"));
+    renderer->setFlatMode();
 
     defaults();
 

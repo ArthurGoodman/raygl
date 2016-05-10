@@ -14,6 +14,7 @@ class Renderer : public QWindow, protected QOpenGLFunctions_3_3_Core {
     QOpenGLFramebufferObject *backBuffer, *frameBuffer;
 
     ShaderProgram *shader;
+    QString mapFileName, mainFileName;
 
     QSize size, newSize;
 
@@ -34,6 +35,14 @@ public:
     void setRotation(const QPoint &rotation);
     void setScale(float scale);
     void setShader(ShaderProgram *shader);
+    void setMap(const QString &mapFileName);
+    void setMain(const QString &mainFileName);
+
+    void setFlatMode();
+    void setRayMode();
+    void setPathMode();
+
+    void invalidate();
 
 public slots:
     void start();

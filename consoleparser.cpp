@@ -26,7 +26,42 @@ bool ConsoleParser::execute(const QString &cmd) {
         *console << "This is help."
                  << "";
     } else if (token == "blank") {
-        Renderer::instance()->setShader(new ShaderProgram("blank", ""));
+        Renderer::instance()->setShader(new ShaderProgram("pre", "map", "blank", ""));
+    } else if (token == "reset")
+        Renderer::instance()->invalidate();
+    else if (token == "map") {
+        QString fileName = getToken();
+
+        if (!QFile::exists(fileName + ".frag"))
+            *console << "error: file doesn't exist\n";
+        else
+            Renderer::instance()->setMap(fileName);
+    }
+    else if (token == "load") {
+        QString fileName = getToken();
+
+        if (!QFile::exists(fileName + ".frag"))
+            *console << "error: file doesn't exist\n";
+        else
+            Renderer::instance()->setMain(fileName);
+    } else if (token == "edit") {
+        QString fileName = getToken();
+
+        if (!QFile::exists(fileName + ".frag"))
+            *console << "error: file doesn't exist\n";
+        else
+            system(("start " + fileName).toStdString().data());
+    } else if (token == "mode") {
+        QString mode = getToken();
+
+        if (mode == "flat")
+            Renderer::instance()->setFlatMode();
+        else if (mode == "ray")
+            Renderer::instance()->setRayMode();
+        else if (mode == "path")
+            Renderer::instance()->setPathMode();
+        else
+            *console << "error: invalid mode '" + mode + "'\n";
     } else {
         *console << "error: unknown command '" + token + "'\n";
     }

@@ -1,7 +1,7 @@
 #include "shaderprogram.h"
 
-ShaderProgram::ShaderProgram(const QString &mainFileName, const QString &postFileName)
-    : mainFileName(mainFileName), postFileName(postFileName), mainProgram(0), postProgram(0), compiled(false) {
+ShaderProgram::ShaderProgram(const QString &preFileName, const QString &mapFileName, const QString &mainFileName, const QString &postFileName)
+    : preFileName(preFileName), mapFileName(mapFileName), mainFileName(mainFileName), postFileName(postFileName), mainProgram(0), postProgram(0), compiled(false) {
 }
 
 ShaderProgram::~ShaderProgram() {
@@ -18,10 +18,23 @@ bool ShaderProgram::usePostProcessing() {
 }
 
 void ShaderProgram::compile() {
-    loadShader(mainProgram = new QOpenGLShaderProgram, mainFileName);
+    delete mainProgram;
+    delete postProgram;
+
+    QString mainCode;
+
+    if (!preFileName.isEmpty())
+        mainCode += readFile(QString("%0.frag").arg(preFileName));
+
+    if (!mapFileName.isEmpty())
+        mainCode += readFile(QString("%0.frag").arg(mapFileName));
+
+    mainCode += readFile(QString("%0.frag").arg(mainFileName));
+
+    loadShaderFromCode(mainProgram = new QOpenGLShaderProgram, mainCode);
 
     if (!postFileName.isEmpty())
-        loadShader(postProgram = new QOpenGLShaderProgram, postFileName);
+        loadShaderFromFile(postProgram = new QOpenGLShaderProgram, postFileName);
 
     compiled = true;
 }
@@ -34,13 +47,37 @@ QOpenGLShaderProgram *ShaderProgram::getPostProgram() {
     return postProgram;
 }
 
-void ShaderProgram::loadShader(QOpenGLShaderProgram *program, const QString &name) {
-    if (!program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader.vert"))
+void ShaderProgram::setMapFileName(const QString &mapFileName) {
+    this->mapFileName = mapFileName;
+    compiled = false;
+}
+
+void ShaderProgram::setMainFileName(const QString &mainFileName) {
+    this->mainFileName = mainFileName;
+    compiled = false;
+}
+
+void ShaderProgram::loadShaderFromFile(QOpenGLShaderProgram *program, const QString &name) {
+    loadShaderFromCode(program, readFile(QString("%0.frag").arg(name)));
+}
+
+void ShaderProgram::loadShaderFromCode(QOpenGLShaderProgram *program, const QString &code) {
+    if (!program->addShaderFromSourceFile(QOpenGLShader::Vertex, "shader.vert"))
         qDebug() << program->log();
 
-    if (!program->addShaderFromSourceFile(QOpenGLShader::Fragment, QString(":/%0.frag").arg(name)))
+    if (!program->addShaderFromSourceCode(QOpenGLShader::Fragment, code))
         qDebug() << program->log();
 
     if (!program->link())
         qDebug() << program->log();
+}
+
+QString ShaderProgram::readFile(const QString &fileName) {
+    QFile file(fileName);
+
+    if (!file.open(QFile::ReadOnly | QFile::Text))
+        return "";
+
+    QTextStream stream(&file);
+    return stream.readAll();
 }

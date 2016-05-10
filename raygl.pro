@@ -18,6 +18,3 @@ HEADERS  += \
     console.h \
     consoleparser.h \
     shaderprogram.h
-
-RESOURCES += \
-    resources.qrc

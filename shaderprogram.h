@@ -6,12 +6,12 @@
 class ShaderProgram : public QObject {
     Q_OBJECT
 
-    QString mainFileName, postFileName;
+    QString preFileName, mapFileName, mainFileName, postFileName;
     QOpenGLShaderProgram *mainProgram, *postProgram;
     bool compiled;
 
 public:
-    explicit ShaderProgram(const QString &mainFileName, const QString &postFileName);
+    explicit ShaderProgram(const QString &preFileName, const QString &mapFileName, const QString &mainFileName, const QString &postFileName);
     ~ShaderProgram();
 
     bool isCompiled();
@@ -22,6 +22,13 @@ public:
     QOpenGLShaderProgram *getMainProgram();
     QOpenGLShaderProgram *getPostProgram();
 
+    void setMapFileName(const QString &mapFileName);
+    void setMainFileName(const QString &mainFileName);
+
 private:
-    void loadShader(QOpenGLShaderProgram *program, const QString &name);
+    void loadShaderFromFile(QOpenGLShaderProgram *program, const QString &name);
+    void loadShaderFromCode(QOpenGLShaderProgram *program, const QString &code);
+
+private:
+    QString readFile(const QString &fileName);
 };

@@ -12,6 +12,9 @@ Renderer::Renderer(QWindow *parent)
     setSurfaceType(QWindow::OpenGLSurface);
     setFormat(QSurfaceFormat());
     create();
+
+    mapFileName = "mandelbulb";
+    mainFileName = "blank";
 }
 
 Renderer::~Renderer() {
@@ -36,6 +39,34 @@ void Renderer::setShader(ShaderProgram *shader) {
         delete this->shader;
 
     this->shader = shader;
+
+    reset = true;
+}
+
+void Renderer::setMap(const QString &mapFileName) {
+    shader->setMapFileName(this->mapFileName = mapFileName);
+    reset = true;
+}
+
+void Renderer::setMain(const QString &mainFileName) {
+    shader->setMainFileName(this->mainFileName = mainFileName);
+    reset = true;
+}
+
+void Renderer::setFlatMode() {
+    setShader(new ShaderProgram("pre", "", mainFileName, ""));
+}
+
+void Renderer::setRayMode() {
+    setShader(new ShaderProgram("pre", mapFileName, "rayMain", ""));
+}
+
+void Renderer::setPathMode() {
+    setShader(new ShaderProgram("pre", mapFileName, "pathMain", "post"));
+}
+
+void Renderer::invalidate() {
+    reset = true;
 }
 
 void Renderer::start() {
