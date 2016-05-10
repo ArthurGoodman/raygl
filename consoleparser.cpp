@@ -2,6 +2,8 @@
 #include <QtWidgets>
 
 #include "console.h"
+#include "renderer.h"
+#include "shaderprogram.h"
 
 ConsoleParser::ConsoleParser(Console *console)
     : console(console) {
@@ -16,15 +18,18 @@ bool ConsoleParser::execute(const QString &cmd) {
     } else if (token == "cls" || token == "clear") {
         console->clear();
         console->insertPrompt();
+
         return false;
-    } else if (token == "exit" || token == "quit")
+    } else if (token == "exit" || token == "quit") {
         qApp->quit();
-    else if (token == "help" || token == "?")
+    } else if (token == "help" || token == "?") {
         *console << "This is help."
                  << "";
-
-    else
+    } else if (token == "blank") {
+        Renderer::instance()->setShader(new ShaderProgram("blank", ""));
+    } else {
         *console << "error: unknown command '" + token + "'\n";
+    }
 
     return true;
 }

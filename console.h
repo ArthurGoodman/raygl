@@ -12,7 +12,7 @@ class Console : public QTextEdit {
     bool locked;
 
 public:
-    Console(QWidget *parent = 0);
+    explicit Console(QWidget *parent = 0);
 
     void setPrompt(QString prompt);
 

@@ -1,18 +1,21 @@
 #include "renderer.h"
 
+#include "shaderprogram.h"
+
+Renderer *Renderer::instance() {
+    static Renderer *renderer = new Renderer;
+    return renderer;
+}
+
 Renderer::Renderer(QWindow *parent)
-    : QWindow(parent), context(0), frameBuffer(0) {
+    : QWindow(parent), context(0), frameBuffer(0), shader(0), reset(false) {
     setSurfaceType(QWindow::OpenGLSurface);
     setFormat(QSurfaceFormat());
     create();
-
-    reset = false;
 }
 
 Renderer::~Renderer() {
     delete context;
-    delete mainProgram;
-    delete postProgram;
     delete vertexBuffer;
     delete backBuffer;
     delete frameBuffer;
@@ -26,6 +29,13 @@ void Renderer::setRotation(const QPoint &rotation) {
 void Renderer::setScale(float scale) {
     this->scale = scale;
     reset = true;
+}
+
+void Renderer::setShader(ShaderProgram *shader) {
+    if (this->shader)
+        delete this->shader;
+
+    this->shader = shader;
 }
 
 void Renderer::start() {
@@ -71,17 +81,22 @@ void Renderer::render() {
         context->doneCurrent();
     }
 
-    if (backBuffer == 0 || frameBuffer == 0)
+    if (backBuffer == 0 || frameBuffer == 0 || shader == 0)
         return;
 
     context->makeCurrent(this);
 
+    if (!shader->isCompiled())
+        shader->compile();
+
     GLfloat elapsed = (GLfloat)time.elapsed() / 1000.f;
 
-    draw(mainProgram, backBuffer, elapsed);
-    draw(postProgram, frameBuffer, elapsed);
+    draw(shader->getMainProgram(), backBuffer, elapsed);
 
-    emit updatePixmap(frameBuffer->toImage());
+    if (shader->usePostProcessing())
+        draw(shader->getPostProgram(), frameBuffer, elapsed);
+
+    emit updatePixmap((shader->usePostProcessing() ? frameBuffer : backBuffer)->toImage());
 
     frame++;
 
@@ -140,7 +155,6 @@ void Renderer::initialize() {
     initializeOpenGLFunctions();
 
     createVertexBuffer();
-    loadShaders();
 
     context->doneCurrent();
 }
@@ -163,20 +177,4 @@ void Renderer::createVertexBuffer() {
     vertexBuffer->bind();
     vertexBuffer->allocate(vertices.data(), vertices.size() * sizeof(GLfloat));
     vertexBuffer->release();
-}
-
-void Renderer::loadShaders() {
-    loadShader(mainProgram = new QOpenGLShaderProgram(this), "main");
-    loadShader(postProgram = new QOpenGLShaderProgram(this), "post");
-}
-
-void Renderer::loadShader(QOpenGLShaderProgram *program, const QString &name) {
-    if (!program->addShaderFromSourceFile(QOpenGLShader::Vertex, QString(":/%0.vert").arg(name)))
-        qDebug() << program->log();
-
-    if (!program->addShaderFromSourceFile(QOpenGLShader::Fragment, QString(":/%0.frag").arg(name)))
-        qDebug() << program->log();
-
-    if (!program->link())
-        qDebug() << program->log();
 }

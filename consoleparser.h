@@ -12,7 +12,7 @@ class ConsoleParser : public QObject {
     int pos;
 
 public:
-    ConsoleParser(Console *console);
+    explicit ConsoleParser(Console *console);
 
     bool execute(const QString &cmd);
 

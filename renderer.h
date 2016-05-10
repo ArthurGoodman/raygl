@@ -4,13 +4,16 @@
 #include <QtOpenGL>
 #include <QOpenGLFunctions_3_3_Core>
 
+class ShaderProgram;
+
 class Renderer : public QWindow, protected QOpenGLFunctions_3_3_Core {
     Q_OBJECT
 
     QOpenGLContext *context;
-    QOpenGLShaderProgram *mainProgram, *postProgram;
     QOpenGLBuffer *vertexBuffer;
     QOpenGLFramebufferObject *backBuffer, *frameBuffer;
+
+    ShaderProgram *shader;
 
     QSize size, newSize;
 
@@ -23,11 +26,14 @@ class Renderer : public QWindow, protected QOpenGLFunctions_3_3_Core {
     bool reset;
 
 public:
+    static Renderer *instance();
+
     explicit Renderer(QWindow *parent = 0);
     ~Renderer();
 
     void setRotation(const QPoint &rotation);
     void setScale(float scale);
+    void setShader(ShaderProgram *shader);
 
 public slots:
     void start();
@@ -43,6 +49,4 @@ private:
     void draw(QOpenGLShaderProgram *program, QOpenGLFramebufferObject *buffer, GLfloat elapsed);
     void initialize();
     void createVertexBuffer();
-    void loadShaders();
-    void loadShader(QOpenGLShaderProgram *program, const QString &name);
 };

@@ -1,4 +1,6 @@
-#include "Widget.h"
+#include "widget.h"
+
+#include "shaderprogram.h"
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent) {
@@ -6,9 +8,11 @@ Widget::Widget(QWidget *parent)
     setMinimumSize(qApp->desktop()->size() / 4);
     move(qApp->desktop()->rect().center() - rect().center());
 
-    renderer = new Renderer;
+    renderer = Renderer::instance();
     connect(this, &Widget::resizeViewport, renderer, &Renderer::resizeViewport);
     connect(renderer, &Renderer::updatePixmap, this, &Widget::updatePixmap);
+
+    renderer->setShader(new ShaderProgram("main", "post"));
 
     defaults();
 
@@ -71,6 +75,9 @@ void Widget::keyPressEvent(QKeyEvent *e) {
 void Widget::keyReleaseEvent(QKeyEvent *e) {
     switch (e->key()) {
     case Qt::Key_Return:
+        if (consoleVisible)
+            break;
+
         const static char *imagesDirName = "images";
 
         QDir dir;
