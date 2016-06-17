@@ -37,6 +37,13 @@ void ShaderProgram::compile() {
         loadShaderFromFile(postProgram = new QOpenGLShaderProgram, postFileName);
 
     compiled = true;
+
+    QFile file("dump.frag");
+    file.open(QFile::WriteOnly | QFile::Text);
+
+    QTextStream out(&file);
+
+    out << mainCode;
 }
 
 QOpenGLShaderProgram *ShaderProgram::getMainProgram() {

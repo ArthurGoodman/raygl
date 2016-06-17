@@ -143,38 +143,34 @@ vec3 calculateColor(vec3 ro, vec3 rd, float sa ) {
    return accumulatedColor;
 }
 
-mat3 camera(vec3 eye, vec3 target) {
-    vec3 z = normalize(target - eye);
-    vec3 up = vec3(0.0, 1.0, 0.0);
-    vec3 x = normalize(cross(z, up));
-    vec3 y = normalize(cross(x, z));
-
-    return mat3(x, y, z);
+mat3 camera(in vec3 eye, in vec3 target, in float cr) {
+    vec3 cw = normalize(target - eye);
+    vec3 cp = vec3(sin(cr), cos(cr), 0.0);
+    vec3 cu = normalize(cross(cw, cp));
+    vec3 cv = normalize(cross(cu, cw));
+    return mat3(cu, cv, -cw);
 }
 
 void main() {
     const float pi = 2.0 * acos(0.0);
-    
-    vec2 position = -1.0 + 2.0 * gl_FragCoord.xy / uResolution;
-    position.x *= uResolution.x / uResolution.y;
 
     float sa = hash( dot( gl_FragCoord.xy, vec2(12.9898, 78.233) ) + 1113.1*float(uFrame) );
+
+    vec2 of = -0.5 + vec2( hash(sa+13.271), hash(sa+63.216) );
+    vec2 p = (-uResolution.xy + 2.0*(gl_FragCoord.xy+of)) / uResolution.y;
 
     vec2 r = uRotation / uResolution;
 
     vec2 sign = vec2(mod(r.x + 0.5, 2) <= 1 ? 1 : -1, mod(r.y + 0.5, 2) <= 1 ? 1 : -1);
     vec3 eye = vec3(/*sign.y * */cos(pi * r.y) * cos(pi * r.x), sign.y * sin(pi * r.y), sign.y * cos(pi * r.y) * sin(pi * r.x)) / uScale * 3;
 
-    vec3 ro = eye;
-    vec3 ta = vec3(0.0, 0.0, 0.0);
-
-    mat3 view = camera(ro, ta);
-    vec3 rd = view * normalize(vec3(position, 2.5) / uScale);
+    mat3 view = camera(eye, vec3(0.0, 0.0, 0.0), 0.0);
+    vec3 target = normalize(view * vec3(p, -2.5) / uScale);
 
     vec3 col = texture2D( uBuffer, gl_FragCoord.xy/uResolution.xy ).xyz;
     if( uFrame==0 ) col = vec3(0.0);
 
-    col += calculateColor( ro, rd, sa );
+    col += calculateColor(eye, target, sa);
 
     fragColor = vec4( col, 1.0 );
 }
