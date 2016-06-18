@@ -105,9 +105,9 @@ void Widget::mouseReleaseEvent(QMouseEvent *) {
 
 void Widget::wheelEvent(QWheelEvent *e) {
     if (e->delta() > 1)
-        scale *= 1.05;
+        scale *= 1.05f;
     else
-        scale /= 1.05;
+        scale /= 1.05f;
 
     renderer->setScale(scale);
 }
