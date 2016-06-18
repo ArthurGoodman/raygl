@@ -36,8 +36,7 @@ bool ConsoleParser::execute(const QString &cmd) {
             *console << "error: file doesn't exist\n";
         else
             Renderer::instance()->setMap(fileName);
-    }
-    else if (token == "load") {
+    } else if (token == "load") {
         QString fileName = getToken();
 
         if (!QFile::exists(fileName + ".frag"))
@@ -50,7 +49,7 @@ bool ConsoleParser::execute(const QString &cmd) {
         if (!QFile::exists(fileName + ".frag"))
             *console << "error: file doesn't exist\n";
         else
-            system(("start " + fileName).toStdString().data());
+            system(("start " + fileName + ".frag").toStdString().data());
     } else if (token == "mode") {
         QString mode = getToken();
 

@@ -13,7 +13,7 @@ Renderer::Renderer(QWindow *parent)
     setFormat(QSurfaceFormat());
     create();
 
-    mapFileName = "mandelbulb";
+    mapFileName = "map";
     mainFileName = "blank";
 }
 
