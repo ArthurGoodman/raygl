@@ -92,6 +92,9 @@ void Widget::keyReleaseEvent(QKeyEvent *e) {
 }
 
 void Widget::mousePressEvent(QMouseEvent *e) {
+    if (e->button() == Qt::RightButton)
+        renderer->setMouse(e->pos() - rotation);
+
     lastMousePosition = e->pos();
 }
 

@@ -17,7 +17,7 @@ void main() {
             for (; n < maxIt; n++) {
                 z = vec2(z.x * z.x - z.y * z.y, 2 * z.x * z.y) + c;
 
-                trap = min(trap, length(p - z));
+                trap = min(trap, abs(1 - length(p - z)));
 
                 if (dot(z, z) > 8)
                     break;
