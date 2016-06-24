@@ -27,6 +27,8 @@ Widget::Widget(QWidget *parent)
 
     consoleVisible = false;
 
+    setMouseTracking(true);
+
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), SLOT(update()));
     connect(this, SIGNAL(destroyed()), timer, SLOT(deleteLater()));
@@ -94,10 +96,13 @@ void Widget::mousePressEvent(QMouseEvent *e) {
 }
 
 void Widget::mouseMoveEvent(QMouseEvent *e) {
-    rotation += e->pos() - lastMousePosition;
-    renderer->setRotation(rotation);
+    if (e->buttons() & Qt::LeftButton) {
+        rotation += e->pos() - lastMousePosition;
+        renderer->setRotation(rotation);
 
-    lastMousePosition = e->pos();
+        lastMousePosition = e->pos();
+    } else if (e->buttons() & Qt::RightButton)
+        renderer->setMouse(e->pos());
 }
 
 void Widget::mouseReleaseEvent(QMouseEvent *) {

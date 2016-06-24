@@ -8,7 +8,7 @@ Renderer *Renderer::instance() {
 }
 
 Renderer::Renderer(QWindow *parent)
-    : QWindow(parent), context(0), frameBuffer(0), shader(0), reset(false) {
+    : QWindow(parent), context(0), backBuffer(0), frameBuffer(0), shader(0), reset(false) {
     setSurfaceType(QWindow::OpenGLSurface);
     setFormat(QSurfaceFormat());
     create();
@@ -26,6 +26,11 @@ Renderer::~Renderer() {
 
 void Renderer::setRotation(const QPoint &rotation) {
     this->rotation = rotation;
+    reset = true;
+}
+
+void Renderer::setMouse(const QPoint &mouse) {
+    this->mouse = mouse;
     reset = true;
 }
 
@@ -158,6 +163,7 @@ void Renderer::draw(QOpenGLShaderProgram *program, QOpenGLFramebufferObject *buf
     program->setUniformValue("uTime", elapsed);
     program->setUniformValue("uFrame", frame);
     program->setUniformValue("uSamples", 1);
+    program->setUniformValue("uMouse", mouse);
 
     for (int i = 0; i < vertexBuffer->size(); i += 12)
         glDrawArrays(GL_TRIANGLES, i, 12);

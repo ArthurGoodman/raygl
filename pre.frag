@@ -9,6 +9,7 @@ uniform float uScale;
 uniform float uTime;
 uniform int uFrame;
 uniform int uSamples;
+uniform vec2 uMouse;
 
 // Operations.
 
