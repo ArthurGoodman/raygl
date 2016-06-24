@@ -6,7 +6,7 @@ void main() {
 
     for (int sx = 0; sx < samples; sx++) {
         for (int sy = 0; sy < samples; sy++) {
-            vec2 p = vec2(-.5, 0) + ((vec2(uMouse.x, -uMouse.y) - vec2(uResolution.x, -uResolution.y) / 2 + vec2(float(sx), float(sy)) / float(samples) / 1.5) / uScale - vec2(uRotation.x, -uRotation.y) / uScale) / uResolution.y;
+            vec2 p = vec2(-.5, 0) + (vec2(uMouse.x, -uMouse.y) - vec2(uResolution.x, -uResolution.y) / 2) / uResolution.y;
             vec2 c = vec2(-.5, 0) + ((gl_FragCoord.xy - uResolution.xy / 2 + vec2(float(sx), float(sy)) / float(samples) / 1.5) / uScale - vec2(uRotation.x, -uRotation.y) / uScale) / uResolution.y;
 
             int n = 0;
@@ -17,7 +17,7 @@ void main() {
             for (; n < maxIt; n++) {
                 z = vec2(z.x * z.x - z.y * z.y, 2 * z.x * z.y) + c;
 
-                trap = min(trap, length(p - z) + dot(p, z));
+                trap = min(trap, length(p - z));
 
                 if (dot(z, z) > 8)
                     break;
