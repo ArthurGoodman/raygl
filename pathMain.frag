@@ -44,27 +44,29 @@ vec4 intersect( in vec3 ro, in vec3 rd ) {
     return vec4(res, color);
 }
 
-float shadow( in vec3 ro, in vec3 rd ) {
+//vec3 sunDir = normalize(vec3(-0.3,1.3,0.1));
+vec3 sunDir = normalize(vec3(-0.5, 0.5, -0.5));
+vec3 sunCol = 6.0 * vec3(1.0,0.8,0.6);
+vec3 skyCol = 4.0 * vec3(0.2,0.35,0.5);
+
+float shadow(in vec3 ro, in vec3 rd) {
     float res = 0.0;
 
-    float tmax = 12.0;
+    float tmax = 1.0;
 
     float t = 0.001;
-    for(int i=0; i<80; i++ ) {
-        float h = map(ro+rd*t).x;
-        if( h<0.0001 || t>tmax) break;
+    for (int i = 0; i < 80; i++) {
+        float h = map(ro + rd * t).x;
+        if (h < 0.0001 || t > tmax)
+            break;
         t += h;
     }
 
-    if( t>tmax ) res = 1.0;
+    if (t > tmax)
+        res = 1.0;
 
     return res;
 }
-
-//vec3 sunDir = normalize(vec3(-0.3,1.3,0.1));
-vec3 sunDir = normalize(vec3(-0.5, 0.5,-0.5));
-vec3 sunCol = 6.0 * vec3(1.0,0.8,0.6);
-vec3 skyCol = 4.0 * vec3(0.2,0.35,0.5);
 
 vec3 calculateColor(vec3 ro, vec3 rd, float sa ) {
     const float epsilon = 0.0001;

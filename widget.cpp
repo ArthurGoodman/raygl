@@ -111,7 +111,11 @@ void Widget::mousePressEvent(QMouseEvent *e) {
 
 void Widget::mouseMoveEvent(QMouseEvent *e) {
     if (e->buttons() & Qt::LeftButton) {
-        rotation += QPointF(e->pos() - lastMousePosition) / scale;
+        if (renderer->isFlat())
+            rotation += QPointF(e->pos() - lastMousePosition) / scale;
+        else
+            rotation += e->pos() - lastMousePosition;
+
         renderer->setRotation(rotation);
 
         lastMousePosition = e->pos();

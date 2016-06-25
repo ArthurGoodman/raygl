@@ -24,7 +24,7 @@ class Renderer : public QWindow, protected QOpenGLFunctions_3_3_Core {
     QPointF rotation, mouse;
     float scale;
 
-    bool reset;
+    bool reset, flat;
 
 public:
     static Renderer *instance();
@@ -43,6 +43,8 @@ public:
     void setFlatMode();
     void setRayMode();
     void setPathMode();
+
+    bool isFlat();
 
     void invalidate();
 

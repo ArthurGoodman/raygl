@@ -64,15 +64,22 @@ void Renderer::setMain(const QString &mainFileName) {
 }
 
 void Renderer::setFlatMode() {
+    flat = true;
     setShader(new ShaderProgram("pre", "", mainFileName, ""));
 }
 
 void Renderer::setRayMode() {
+    flat = false;
     setShader(new ShaderProgram("pre", mapFileName, "rayMain", ""));
 }
 
 void Renderer::setPathMode() {
+    flat = false;
     setShader(new ShaderProgram("pre", mapFileName, "pathMain", "post"));
+}
+
+bool Renderer::isFlat() {
+    return flat;
 }
 
 void Renderer::invalidate() {
