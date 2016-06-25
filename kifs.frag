@@ -57,5 +57,5 @@ vec4 map(vec3 p) {
         amp /= s; // Decrease the amplitude by the scaling factor.
     }
  
-    return vec4(d - .035, vec3(1.0)); // .35 is analous to the object size.
+    return vec4(d - .035, vec3(0.5)); // .35 is analous to the object size.
 }

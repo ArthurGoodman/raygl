@@ -23,5 +23,5 @@ vec4 map(in vec3 p){
     }
     p=abs(p);
     float d2=max(p.x,max(p.y,p.z))-b;
-    return vec4(max(d2,-d), vec3(1.0));
+    return vec4(max(d2,-d), vec3(0.5));
 }
