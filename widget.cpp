@@ -27,6 +27,8 @@ Widget::Widget(QWidget *parent)
 
     consoleVisible = false;
 
+    samples = 1;
+
     setMouseTracking(true);
 
     QTimer *timer = new QTimer(this);
@@ -76,6 +78,15 @@ void Widget::keyPressEvent(QKeyEvent *e) {
 
 void Widget::keyReleaseEvent(QKeyEvent *e) {
     switch (e->key()) {
+    case Qt::Key_Q:
+        if (samples > 1)
+            renderer->setSamples(--samples);
+        break;
+
+    case Qt::Key_W:
+        renderer->setSamples(++samples);
+        break;
+
     case Qt::Key_Return:
         if (consoleVisible)
             break;
@@ -93,19 +104,19 @@ void Widget::keyReleaseEvent(QKeyEvent *e) {
 
 void Widget::mousePressEvent(QMouseEvent *e) {
     if (e->button() == Qt::RightButton)
-        renderer->setMouse(e->pos() - rotation);
+        renderer->setMouse((e->pos() - rect().center()) / scale - rotation);
 
     lastMousePosition = e->pos();
 }
 
 void Widget::mouseMoveEvent(QMouseEvent *e) {
     if (e->buttons() & Qt::LeftButton) {
-        rotation += e->pos() - lastMousePosition;
+        rotation += QPointF(e->pos() - lastMousePosition) / scale;
         renderer->setRotation(rotation);
 
         lastMousePosition = e->pos();
     } else if (e->buttons() & Qt::RightButton)
-        renderer->setMouse(e->pos() - rotation);
+        renderer->setMouse((e->pos() - rect().center()) / scale - rotation);
 }
 
 void Widget::mouseReleaseEvent(QMouseEvent *) {

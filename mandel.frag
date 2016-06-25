@@ -1,12 +1,11 @@
 void main() {
-    const int samples = 2;
     const int maxIt = 1000;
 
     vec3 col = vec3(0.0);
 
-    for (int sx = 0; sx < samples; sx++) {
-        for (int sy = 0; sy < samples; sy++) {
-            vec2 c = vec2(-.5, 0) + ((gl_FragCoord.xy - uResolution.xy / 2 + vec2(float(sx), float(sy)) / float(samples) / 1.5) / uScale - vec2(uRotation.x, -uRotation.y) / uScale) / uResolution.y;
+    for (int sx = 0; sx < uSamples; sx++) {
+        for (int sy = 0; sy < uSamples; sy++) {
+            vec2 c = vec2(-.5, 0) + ((gl_FragCoord.xy - uResolution.xy / 2 + vec2(float(sx), float(sy)) / float(uSamples) / 1.5) / uScale - vec2(uRotation.x, -uRotation.y)) / uResolution.y;
 
             float q = (c.x - .25) * (c.x - .25) + c.y * c.y;
             if (q * (q + (c.x - .25)) < .25 * c.y * c.y)
@@ -27,7 +26,7 @@ void main() {
         }
     }
 
-    col /= float(samples * samples);
+    col /= float(uSamples * uSamples);
 
     fragColor = vec4(col, 1.0);
 }

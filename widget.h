@@ -17,10 +17,11 @@ class Widget : public QWidget {
 
     QPixmap pixmap;
 
-    QPoint lastMousePosition;
+    QPointF lastMousePosition;
 
-    QPoint rotation;
+    QPointF rotation;
     float scale;
+    int samples;
 
 public:
     explicit Widget(QWidget *parent = 0);
