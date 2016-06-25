@@ -109,14 +109,10 @@ void Renderer::render() {
         QOpenGLFramebufferObjectFormat fboFormat;
         fboFormat.setInternalTextureFormat(GL_RGB32F);
 
-        if (backBuffer)
-            delete backBuffer;
-
+        delete backBuffer;
         backBuffer = new QOpenGLFramebufferObject(size, fboFormat);
 
-        if (frameBuffer)
-            delete frameBuffer;
-
+        delete frameBuffer;
         frameBuffer = new QOpenGLFramebufferObject(size, fboFormat);
 
         context->doneCurrent();
