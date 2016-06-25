@@ -167,11 +167,11 @@ void Renderer::draw(QOpenGLShaderProgram *program, QOpenGLFramebufferObject *buf
     program->setUniformValue("uBuffer", 1);
     program->setUniformValue("uResolution", size);
     program->setUniformValue("uRotation", rotation);
+    program->setUniformValue("uMouse", mouse);
     program->setUniformValue("uScale", scale);
     program->setUniformValue("uTime", elapsed);
     program->setUniformValue("uFrame", frame);
     program->setUniformValue("uSamples", samples);
-    program->setUniformValue("uMouse", mouse);
 
     for (int i = 0; i < vertexBuffer->size(); i += 12)
         glDrawArrays(GL_TRIANGLES, i, 12);
