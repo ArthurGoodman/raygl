@@ -20,7 +20,7 @@ class Widget : public QWidget {
     QPointF lastMousePosition;
 
     QPointF rotation;
-    float scale;
+    float scale, param;
     int samples;
 
 public:

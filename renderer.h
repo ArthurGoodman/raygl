@@ -22,7 +22,7 @@ class Renderer : public QWindow, protected QOpenGLFunctions_3_3_Core {
     int frame, samples;
 
     QPointF rotation, mouse;
-    float scale;
+    float scale, param;
 
     bool reset, flat;
 
@@ -36,6 +36,7 @@ public:
     void setRotation(const QPointF &rotation);
     void setMouse(const QPointF &mouse);
     void setScale(float scale);
+    void setParam(float param);
     void setShader(ShaderProgram *shader);
     void setMap(const QString &mapFileName);
     void setMain(const QString &mainFileName);

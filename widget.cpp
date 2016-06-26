@@ -27,8 +27,6 @@ Widget::Widget(QWidget *parent)
 
     consoleVisible = false;
 
-    samples = 1;
-
     setMouseTracking(true);
 
     QTimer *timer = new QTimer(this);
@@ -77,6 +75,9 @@ void Widget::keyPressEvent(QKeyEvent *e) {
 }
 
 void Widget::keyReleaseEvent(QKeyEvent *e) {
+    if (consoleVisible)
+        return;
+
     switch (e->key()) {
     case Qt::Key_Q:
         if (samples > 1)
@@ -87,10 +88,11 @@ void Widget::keyReleaseEvent(QKeyEvent *e) {
         renderer->setSamples(++samples);
         break;
 
-    case Qt::Key_Return:
-        if (consoleVisible)
-            break;
+    case Qt::Key_Backspace:
+        defaults();
+        break;
 
+    case Qt::Key_Return:
         const static char *imagesDirName = "images";
 
         QDir dir;
@@ -127,12 +129,21 @@ void Widget::mouseReleaseEvent(QMouseEvent *) {
 }
 
 void Widget::wheelEvent(QWheelEvent *e) {
-    if (e->delta() > 1)
-        scale *= 1.05f;
-    else
-        scale /= 1.05f;
+    if (e->modifiers() & Qt::ControlModifier) {
+        if (e->delta() > 1)
+            param += 0.1;
+        else
+            param -= 0.1;
 
-    renderer->setScale(scale);
+        renderer->setParam(param);
+    } else {
+        if (e->delta() > 1)
+            scale *= 1.05f;
+        else
+            scale /= 1.05f;
+
+        renderer->setScale(scale);
+    }
 }
 
 void Widget::paintEvent(QPaintEvent *) {
@@ -143,6 +154,8 @@ void Widget::paintEvent(QPaintEvent *) {
 void Widget::defaults() {
     renderer->setRotation(rotation = QPoint());
     renderer->setScale(scale = 1);
+    renderer->setParam(param = 0);
+    renderer->setSamples(samples = 1);
 }
 
 void Widget::toggleConsole() {

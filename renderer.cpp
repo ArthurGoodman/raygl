@@ -44,6 +44,11 @@ void Renderer::setScale(float scale) {
     reset = true;
 }
 
+void Renderer::setParam(float param) {
+    this->param = param;
+    reset = true;
+}
+
 void Renderer::setShader(ShaderProgram *shader) {
     if (this->shader)
         delete this->shader;
@@ -170,6 +175,7 @@ void Renderer::draw(QOpenGLShaderProgram *program, QOpenGLFramebufferObject *buf
     program->setUniformValue("uMouse", mouse);
     program->setUniformValue("uScale", scale);
     program->setUniformValue("uTime", elapsed);
+    program->setUniformValue("uParam", param);
     program->setUniformValue("uFrame", frame);
     program->setUniformValue("uSamples", samples);
 

@@ -8,6 +8,7 @@ uniform vec2 uRotation;
 uniform vec2 uMouse;
 uniform float uScale;
 uniform float uTime;
+uniform float uParam;
 uniform int uFrame;
 uniform int uSamples;
 
