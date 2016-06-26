@@ -26,6 +26,7 @@ Widget::Widget(QWidget *parent)
     consoleParser = new ConsoleParser(console);
 
     consoleVisible = false;
+    setFocus();
 
     setMouseTracking(true);
 
