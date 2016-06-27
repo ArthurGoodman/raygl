@@ -61,6 +61,10 @@ bool ConsoleParser::execute(const QString &cmd) {
             Renderer::instance()->setPathMode();
         else
             *console << "error: invalid mode '" + mode + "'\n";
+    } else if (token == "new") {
+        QFile file(getToken() + ".frag");
+        file.open(QFile::ReadWrite | QFile::Text);
+        file.close();
     } else {
         *console << "error: unknown command '" + token + "'\n";
     }
